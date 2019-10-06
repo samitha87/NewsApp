@@ -36,7 +36,6 @@ class TopNewsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
         getBitcoinNews()
-        sample01.text = "frag001"
 
         news_list_view.setOnItemClickListener { parent, view, position, id ->
 
@@ -97,6 +96,7 @@ class TopNewsFragment : Fragment() {
 
                 var adapter = newsItemAdapter(context!!, dataSource)
                 news_list_view.adapter = adapter
+                news_list_view.visibility = View.VISIBLE
 
 
 

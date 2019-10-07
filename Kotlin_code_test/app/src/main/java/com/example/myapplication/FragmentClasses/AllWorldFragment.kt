@@ -1,6 +1,7 @@
 package com.example.myapplication.FragmentClasses
 
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -19,6 +20,7 @@ import com.example.myapplication.AppData.AppConstants
 import com.example.myapplication.ObjectData.newsItemObject
 
 import com.example.myapplication.R
+import com.example.myapplication.detal_view
 import kotlinx.android.synthetic.main.fragment_top_news.*
 import org.json.JSONObject
 
@@ -52,7 +54,6 @@ class AllWorldFragment : Fragment() {
         selection_spinner.onItemSelectedListener = object: AdapterView.OnItemSelectedListener{
             override fun onItemSelected(parent:AdapterView<*>, view: View, position: Int, id: Long){
                 // Display the selected item text on text view
-
                 getPrefNews(userPrefs.get(position), "1")
             }
 
@@ -61,7 +62,24 @@ class AllWorldFragment : Fragment() {
                 getPrefNews(userPrefs.get(0), "0")
             }
         }
+// listview item click event
+        news_list_view.setOnItemClickListener { parent, view, position, id ->
 
+
+            var newsTitle       = dataSource.get(position).title
+            var newsDescription = dataSource.get(position).description
+            var newsImage_url   = dataSource.get(position).newsImageUrl
+            var newsOriginUrl   = dataSource.get(position).newsUrl
+            var newsContent     = dataSource.get(position).Contents
+
+            val intent = Intent(context, detal_view::class.java)
+            intent.putExtra("nTitle", newsTitle)
+            intent.putExtra("nDescription",newsDescription)
+            intent.putExtra("nImageUrl", newsImage_url)
+            intent.putExtra("mOriginUrl", newsOriginUrl)
+            intent.putExtra("nContents", newsContent)
+            startActivity(intent)
+        }
     }
 
     fun getPrefNews(pref: String, update: String){
@@ -69,8 +87,6 @@ class AllWorldFragment : Fragment() {
         /*initiate request queue*/
         var queue = Volley.newRequestQueue(context)
         var reqUrl : String = APIEndPoints.PRIMARY_API + APIEndPoints.get_news + pref+ "&apiKey=" + AppConstants.API_key + "&sortBy=popularity"
-
-
 
         // Request a string response from the provided URL.
         val stringReq = StringRequest(
@@ -88,7 +104,6 @@ class AllWorldFragment : Fragment() {
 
                 for (i in 0..articles!!.length() - 1) {
 
-
                     var singleObject = articles.getJSONObject(i)
                     var singleNewsItem = newsItemObject()
                     singleNewsItem.title = singleObject.getString("title")
@@ -98,25 +113,11 @@ class AllWorldFragment : Fragment() {
                     singleNewsItem.Contents = singleObject.getString("content")
                     singleNewsItem.publishedAt = singleObject.getString("publishedAt")
 
-
                     dataSource.add(singleNewsItem)
-
                 }
-
-
 
                 var adapter = newsItemAdapter(context!!, dataSource)
                 news_list_view.adapter = adapter
-
-//                if (update == "1") {
-//                    news_list_view.invalidateViews()
-//                    adapter.notifyDataSetChanged()
-//                }
-
-
-
-
-                Log.i("response", strResp)
 
             },
             Response.ErrorListener {

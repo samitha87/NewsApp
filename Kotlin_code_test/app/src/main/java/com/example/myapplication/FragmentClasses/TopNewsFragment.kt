@@ -53,8 +53,6 @@ class TopNewsFragment : Fragment() {
             intent.putExtra("mOriginUrl", newsOriginUrl)
             intent.putExtra("nContents", newsContent)
             startActivity(intent)
-
-
         }
     }
 

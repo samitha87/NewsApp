@@ -24,7 +24,7 @@ import org.json.JSONObject
 
 class TopNewsFragment : Fragment() {
 
-    val dataSource = ArrayList<newsItemObject> ()
+    private val dataSource = ArrayList<newsItemObject> ()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -39,17 +39,16 @@ class TopNewsFragment : Fragment() {
 
         news_list_view.setOnItemClickListener { parent, view, position, id ->
 
-
             var newsTitle       = dataSource.get(position).title
             var newsDescription = dataSource.get(position).description
-            var newsImage_url   = dataSource.get(position).newsImageUrl
+            var newsimageUrl   = dataSource.get(position).newsImageUrl
             var newsOriginUrl   = dataSource.get(position).newsUrl
             var newsContent     = dataSource.get(position).Contents
 
             val intent = Intent(context, detal_view::class.java)
             intent.putExtra("nTitle", newsTitle)
             intent.putExtra("nDescription",newsDescription)
-            intent.putExtra("nImageUrl", newsImage_url)
+            intent.putExtra("nImageUrl", newsimageUrl)
             intent.putExtra("mOriginUrl", newsOriginUrl)
             intent.putExtra("nContents", newsContent)
             startActivity(intent)
@@ -57,56 +56,50 @@ class TopNewsFragment : Fragment() {
     }
 
 
-    fun getBitcoinNews(){
+    private fun getBitcoinNews(){
 
-        /*initiate request queue*/
-        var queue = Volley.newRequestQueue(context)
-        var reqUrl : String = APIEndPoints.PRIMARY_API + APIEndPoints.get_top_news + "&apiKey=" + AppConstants.API_key + "&pageSize=100"
+        try {/*initiate request queue*/
+            var queue = Volley.newRequestQueue(context)
+            var reqUrl : String = APIEndPoints.PRIMARY_API + APIEndPoints.get_top_news + "&apiKey=" + AppConstants.API_key + "&pageSize=100"
 
-        // Request a string response from the provided URL.
-        val stringReq = StringRequest(
-            Request.Method.GET, reqUrl,
-            Response.Listener<String> { response ->
+            // Request a string response from the provided URL.
+            val stringReq = StringRequest(
+                Request.Method.GET, reqUrl,
+                Response.Listener<String> { response ->
 
-                var strResp = response.toString()
+                    var strResp = response.toString()
 
-                var responseObj = JSONObject(strResp)
-                var articles = responseObj.getJSONArray("articles")
+                    var responseObj = JSONObject(strResp)
+                    var articles = responseObj.getJSONArray("articles")
 
-                for (i in 0..articles!!.length() - 1) {
+                    for (i in 0 until articles.length()) {
 
+                        var singleObject = articles.getJSONObject(i)
+                        var singleNewsItem = newsItemObject()
+                        singleNewsItem.title = singleObject.getString("title")
+                        singleNewsItem.description = singleObject.getString("description")
+                        singleNewsItem.newsImageUrl = singleObject.getString("urlToImage")
+                        singleNewsItem.newsUrl = singleObject.getString("url")
+                        singleNewsItem.Contents = singleObject.getString("content")
+                        singleNewsItem.publishedAt = singleObject.getString("publishedAt")
 
-                    var singleObject = articles.getJSONObject(i)
-                    var singleNewsItem = newsItemObject()
-                    singleNewsItem.title = singleObject.getString("title")
-                    singleNewsItem.description = singleObject.getString("description")
-                    singleNewsItem.newsImageUrl = singleObject.getString("urlToImage")
-                    singleNewsItem.newsUrl = singleObject.getString("url")
-                    singleNewsItem.Contents = singleObject.getString("content")
-                    singleNewsItem.publishedAt = singleObject.getString("publishedAt")
+                        dataSource.add(singleNewsItem)
+                    }
 
+                    var adapter = newsItemAdapter(context!!, dataSource)
+                    news_list_view.adapter = adapter
+                    news_list_view.visibility = View.VISIBLE
 
-                    dataSource.add(singleNewsItem)
+                },
+                Response.ErrorListener {
 
-                }
+                })
 
+            queue.add(stringReq)
 
-
-                var adapter = newsItemAdapter(context!!, dataSource)
-                news_list_view.adapter = adapter
-                news_list_view.visibility = View.VISIBLE
-
-
-
-
-                Log.i("response", strResp)
-
-            },
-            Response.ErrorListener {
-                //                textView!!.text = "That didn't work!"
-            })
-
-        queue.add(stringReq)
+        } catch (e: Exception) {
+            Log.e("error",e.message)
+        }
     }
 
 

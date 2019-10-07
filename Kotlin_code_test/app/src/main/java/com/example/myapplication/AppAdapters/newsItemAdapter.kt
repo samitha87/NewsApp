@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.example.myapplication.ObjectData.newsItemObject
 import com.example.myapplication.R
 import kotlinx.android.synthetic.main.new_list_item.view.*
@@ -28,7 +29,10 @@ class newsItemAdapter (private val context: Context,
 
         Glide.with(context)
             .load(url)
+            .placeholder(R.drawable.loading_image)
+            .transition(DrawableTransitionOptions.withCrossFade())
             .into(rowView.news_image)
+
 
         return rowView
 

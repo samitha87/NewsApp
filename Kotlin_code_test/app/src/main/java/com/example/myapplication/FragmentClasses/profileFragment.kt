@@ -2,6 +2,7 @@ package com.example.myapplication.FragmentClasses
 
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -24,10 +25,22 @@ class profileFragment : Fragment() {
 
         news_list_view.visibility = View.GONE
         profile_layout.visibility = View.VISIBLE
+        val sharedPreference:SharedPreference=SharedPreference(context!!)
+
+        var profName: String = sharedPreference.getValueString("UserName").toString()
+
+        if(profName== "null"){
+            saveButton.visibility = View.VISIBLE
+        }else{
+            saveButton.visibility =View.GONE
+            userNameText.setText(profName)
+            passwordText.setText(sharedPreference.getValueString("passkey"))
+            emailText.setText(sharedPreference.getValueString("email"))
+        }
 
         saveButton.setOnClickListener {
 
-            var isOk: Boolean = true;
+            var isOk: Boolean = true
 
             if (userNameText.length() == 0) {
                 userNameText.error = "Invalid user name."
@@ -45,12 +58,18 @@ class profileFragment : Fragment() {
             }
 
             if (isOk){
-                val sharedPreference:SharedPreference=SharedPreference(context!!)
+                try {
+                    sharedPreference.save("UserName", userNameText.text.toString())
+                    sharedPreference.save("passkey", passwordText.text.toString())
+                    sharedPreference.save("email", emailText.text.toString())
 
-                sharedPreference.save("UserName", userNameText.text.toString())
-                sharedPreference.save("passkey", passwordText.text.toString())
-                sharedPreference.save("email", emailText.text.toString())
-
+                    saveButton.visibility =View.GONE
+                    userNameText.setText(sharedPreference.getValueString("UserName"))
+                    passwordText.setText(sharedPreference.getValueString("passkey"))
+                    emailText.setText(sharedPreference.getValueString("email"))
+                } catch (e: Exception) {
+                    Log.e("error",e.message)
+                }
             }
 
 

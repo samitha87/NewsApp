@@ -20,7 +20,6 @@ class SharedPreference(val context: Context) {
     }
 
     /*get strings*/
-
     fun getValueString(KEY_NAME: String): String? {
 
         return sharedPref.getString(KEY_NAME, null)

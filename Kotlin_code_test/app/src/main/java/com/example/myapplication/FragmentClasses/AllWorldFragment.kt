@@ -37,7 +37,7 @@ class AllWorldFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
-        val userPrefs = arrayOf("Bitcoin","Apple","Earthquake","animal")
+        val userPrefs = arrayOf("Bitcoin","Apple","Earthquake","Animal")
         val adapter = ArrayAdapter(
             context!!,
             android.R.layout.simple_spinner_item, // Layout
@@ -47,7 +47,7 @@ class AllWorldFragment : Fragment() {
         // Set the drop down view resource
         adapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line)
         selection_spinner.adapter = adapter;
-        selection_spinner.visibility = View.VISIBLE
+        filterLayout.visibility = View.VISIBLE
         news_list_view.visibility = View.VISIBLE
 
         // Set an on item selected listener for spinner object
@@ -84,46 +84,49 @@ class AllWorldFragment : Fragment() {
 
     fun getPrefNews(pref: String, update: String){
 
-        /*initiate request queue*/
-        var queue = Volley.newRequestQueue(context)
-        var reqUrl : String = APIEndPoints.PRIMARY_API + APIEndPoints.get_news + pref+ "&apiKey=" + AppConstants.API_key + "&sortBy=popularity"
+        try {/*initiate request queue*/
+            var queue = Volley.newRequestQueue(context)
+            var reqUrl : String = APIEndPoints.PRIMARY_API + APIEndPoints.get_news + pref+ "&apiKey=" + AppConstants.API_key + "&sortBy=popularity"
 
-        // Request a string response from the provided URL.
-        val stringReq = StringRequest(
-            Request.Method.GET, reqUrl,
-            Response.Listener<String> { response ->
+            // Request a string response from the provided URL.
+            val stringReq = StringRequest(
+                Request.Method.GET, reqUrl,
+                Response.Listener<String> { response ->
 
-                var strResp = response.toString()
+                    var strResp = response.toString()
 
-                var responseObj = JSONObject(strResp)
+                    var responseObj = JSONObject(strResp)
 
-                if (dataSource.size>0)
-                    dataSource.clear()
+                    if (dataSource.size>0)
+                        dataSource.clear()
 
-                var articles = responseObj.getJSONArray("articles")
+                    var articles = responseObj.getJSONArray("articles")
 
-                for (i in 0..articles!!.length() - 1) {
+                    for (i in 0..articles!!.length() - 1) {
 
-                    var singleObject = articles.getJSONObject(i)
-                    var singleNewsItem = newsItemObject()
-                    singleNewsItem.title = singleObject.getString("title")
-                    singleNewsItem.description = singleObject.getString("description")
-                    singleNewsItem.newsImageUrl = singleObject.getString("urlToImage")
-                    singleNewsItem.newsUrl = singleObject.getString("url")
-                    singleNewsItem.Contents = singleObject.getString("content")
-                    singleNewsItem.publishedAt = singleObject.getString("publishedAt")
+                        var singleObject = articles.getJSONObject(i)
+                        var singleNewsItem = newsItemObject()
+                        singleNewsItem.title = singleObject.getString("title")
+                        singleNewsItem.description = singleObject.getString("description")
+                        singleNewsItem.newsImageUrl = singleObject.getString("urlToImage")
+                        singleNewsItem.newsUrl = singleObject.getString("url")
+                        singleNewsItem.Contents = singleObject.getString("content")
+                        singleNewsItem.publishedAt = singleObject.getString("publishedAt")
 
-                    dataSource.add(singleNewsItem)
-                }
+                        dataSource.add(singleNewsItem)
+                    }
 
-                var adapter = newsItemAdapter(context!!, dataSource)
-                news_list_view.adapter = adapter
+                    var adapter = newsItemAdapter(context!!, dataSource)
+                    news_list_view.adapter = adapter
 
-            },
-            Response.ErrorListener {
-                //                textView!!.text = "That didn't work!"
-            })
+                },
+                Response.ErrorListener {
+                    //                textView!!.text = "That didn't work!"
+                })
 
-        queue.add(stringReq)
+            queue.add(stringReq)
+        } catch (e: Exception) {
+            Log.e("error",e.message)
+        }
     }
 }
